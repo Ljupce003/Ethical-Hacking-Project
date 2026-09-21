@@ -13,7 +13,7 @@ if (oauthStart < 0 || oauthEnd < oauthStart) throw Error('OAuth source sections 
 const preface = `# OAuth 2.0 и JWT ранливости
 
 **Проектна задача**  
-**Автори:** Љупчо Ангеловски — 221563 (OAuth дел); [име и индекс на коавторот] (JWT дел)  
+**Автори:** Љупчо Ангеловски — 221563 (OAuth дел); Давид Ацевски - 222114 (JWT дел)  
 **Датум:** 20.09.2026
 
 ## Апстракт
