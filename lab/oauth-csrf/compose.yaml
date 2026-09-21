@@ -1,0 +1,25 @@
+services:
+  auth-server:
+    build: .
+    command: ["node", "auth-server.js"]
+    environment:
+      ATTACKER_PUBLIC_URL: http://127.0.0.1:7000
+    ports:
+      - "127.0.0.1:9000:9000"
+
+  client:
+    build: .
+    command: ["node", "client.js"]
+    environment:
+      AUTH_PUBLIC_URL: http://localhost:9000
+      AUTH_INTERNAL_URL: http://auth-server:9000
+    depends_on:
+      - auth-server
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  attacker-site:
+    build: .
+    command: ["node", "attacker-site.js"]
+    ports:
+      - "127.0.0.1:7000:7000"

@@ -1,0 +1,11 @@
+{
+  "name": "oauth2-elaborat",
+  "private": true,
+  "scripts": {
+    "build:html": "node scripts/build-html.mjs",
+    "build:combined": "node scripts/build-combined.mjs && node scripts/build-html.mjs elaborat-oauth-jwt.md elaborat-oauth-jwt.html"
+  },
+  "devDependencies": {
+    "marked": "^16.4.0"
+  }
+}

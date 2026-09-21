@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="mk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Елаборат со локални лабораториски вежби за OAuth 2.0 и JWT ранливости.">
+  <title>OAuth 2.0 и JWT ранливости — елаборат</title>
+  <style>
+    :root{color-scheme:light;--ink:#202020;--muted:#555;--rule:#9b9b9b;--paper:#fff}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:#e7e7e7;color:var(--ink);font:17px/1.58 Georgia,"Times New Roman",serif}
+    .page{max-width:860px;margin:0 auto;padding:58px clamp(24px,6vw,78px);background:var(--paper);min-height:100vh}
+    .cover{min-height:355px;display:flex;flex-direction:column;justify-content:center;text-align:center;border-bottom:1px solid var(--rule);margin-bottom:42px;padding:20px 0 54px}
+    .cover h1{font:700 clamp(1.8rem,3.8vw,2.6rem)/1.23 Georgia,"Times New Roman",serif;margin:0 auto 38px;max-width:680px}
+    .cover p{font:15px/1.8 Arial,Helvetica,sans-serif;color:var(--ink);margin:0;text-align:center}
+    h1,h2,h3,h4{scroll-margin-top:20px;line-height:1.27;color:#171717}
+    h2{font-size:1.52rem;margin:2.8rem 0 1rem;padding-bottom:.35rem;border-bottom:1px solid var(--rule)}
+    h3{font-size:1.18rem;margin:2rem 0 .65rem}
+    h4{font-size:1rem;margin:1.5rem 0 .45rem}
+    p{margin:.65rem 0 .95rem;text-align:justify;hyphens:auto}
+    ul,ol{padding-left:1.5rem;margin:.6rem 0 1rem}
+    li{padding-left:.1rem;margin:.32rem 0}
+    li>p{margin:.16rem 0;text-align:left}
+    strong{font-weight:700}
+    a{color:#222;text-decoration:underline;text-underline-offset:2px}
+    a:hover{color:#555}
+    code{font:.86em/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;background:#f1f1f1;padding:.1em .25em;overflow-wrap:anywhere}
+    .code-block{margin:1rem 0 1.2rem;border:1px solid #b6b6b6;background:#f8f8f8;break-inside:avoid}
+    .code-language{display:block;border-bottom:1px solid #d1d1d1;padding:.25rem .7rem;color:var(--muted);font:11px/1.2 Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+    .code-block pre{margin:0;padding:.75rem .9rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+    .code-block code{font-size:.8rem;background:none;padding:0}
+    table{border-collapse:collapse;width:100%;margin:1.1rem 0 1.4rem;border-top:1px solid #555;border-bottom:1px solid #555;font:14px/1.42 Arial,Helvetica,sans-serif}
+    th,td{padding:.52rem .55rem;border-bottom:1px solid #c5c5c5;text-align:left;vertical-align:top}
+    th{font-weight:700;background:#fafafa}
+    tr:last-child td{border-bottom:0}
+    td code{white-space:nowrap}
+    blockquote{border-left:2px solid #777;margin:1.2rem 0;padding:.2rem .9rem;color:#333}
+    blockquote p{margin:.25rem 0}
+    .toc{padding:0 0 1.35rem;margin:0 0 2.6rem;border-bottom:1px solid var(--rule)}
+    .toc h2{font-size:1.4rem;border:0;margin:0 0 1rem;padding:0;text-align:center}
+    .toc ol{list-style:none;padding:0;margin:0;font:14px/1.45 Arial,Helvetica,sans-serif}
+    .toc li{margin:.14rem 0;padding:.1rem 0}
+    .toc .toc-2{font-weight:700;margin-top:.45rem}
+    .toc .toc-3{padding-left:1.25rem}
+    .toc a{text-decoration:none}
+    .toc a:hover{text-decoration:underline}
+    .diagram{display:flex;flex-direction:column;margin:1.5rem 0 1.8rem;padding:.9rem 0 .7rem;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);break-inside:avoid}
+    .diagram figcaption{order:2;margin:.8rem 0 0;text-align:center;font:13px/1.4 Arial,Helvetica,sans-serif;color:var(--muted)}
+    .roles{display:flex;align-items:stretch;gap:.35rem}
+    .roles div{flex:1;min-width:0;border:1px solid #888;padding:.45rem .25rem;text-align:center;display:flex;flex-direction:column;justify-content:center}
+    .roles div strong{font:700 12px/1.25 Arial,Helvetica,sans-serif}
+    .roles div small{font:10px/1.25 Arial,Helvetica,sans-serif;color:var(--muted)}
+    .roles>span{align-self:center;font:700 14px Arial,Helvetica,sans-serif}
+    .diagram-note{font:12px/1.4 Arial,Helvetica,sans-serif;color:var(--muted);margin:.55rem 0 0;text-align:left}
+    .lane{padding:.25rem .8rem;margin:.4rem 0;border-left:2px solid #888}
+    .lane>b{font:700 13px Arial,Helvetica,sans-serif}
+    .lane ol{margin:.35rem 0;padding-left:1.3rem}
+    .lane li{font:13px/1.43 Arial,Helvetica,sans-serif;margin:.2rem 0}
+    .attack-flow{padding-left:1.45rem;margin:.25rem 0}
+    .attack-flow li{padding:.25rem 0;border-bottom:1px dotted #bbb;font:13px/1.45 Arial,Helvetica,sans-serif}
+    .attack-flow li:last-child{border:0}
+    .footnote{font:12px/1.45 Arial,Helvetica,sans-serif;color:var(--muted);margin-top:2.6rem;border-top:1px solid var(--rule);padding-top:.7rem;text-align:left}
+    @media(max-width:680px){.page{padding:26px 19px}.cover{min-height:260px}.roles{flex-wrap:wrap}.roles div{flex:1 1 28%}.roles>span{display:none}table{display:block;overflow:auto}}
+    @media(max-width:420px){.roles div{flex:1 1 45%}}
+    @media print{@page{size:A4;margin:18mm}body{background:#fff;font-size:11pt}.page{max-width:none;margin:0;padding:0}.cover{min-height:220mm;break-after:page;border:0;margin:0;padding:0}.toc{break-after:page}h2,h3,h4{break-after:avoid}p,li{orphans:3;widows:3}.diagram,.code-block,table{break-inside:avoid}a{color:#222;text-decoration:none}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <article><header class="cover"><h1 id="section-1">OAuth 2.0 и JWT ранливости</h1>
+<p><strong>Проектна задача</strong><br><strong>Автори:</strong> Љупчо Ангеловски — 221563 (OAuth дел); [име и индекс на коавторот] (JWT дел)<br><strong>Датум:</strong> 20.09.2026</p></header>
+<nav class="toc" aria-label="Содржина"><h2>Содржина</h2><ol><li class="toc-2"><a href="#section-2">Апстракт</a></li>
+<li class="toc-2"><a href="#section-3">Вовед</a></li>
+<li class="toc-2"><a href="#section-4">1. Теоретска основа на OAuth 2.0 и OpenID Connect</a></li>
+<li class="toc-3"><a href="#section-5">1.1. Што претставува OAuth 2.0?</a></li>
+<li class="toc-3"><a href="#section-6">1.2. Учесници во OAuth 2.0</a></li>
+<li class="toc-3"><a href="#section-7">1.3. Authorization Code Flow со PKCE</a></li>
+<li class="toc-3"><a href="#section-8">1.4. Улогата на PKCE</a></li>
+<li class="toc-3"><a href="#section-9">1.5. Access token, refresh token и scope</a></li>
+<li class="toc-3"><a href="#section-10">1.6. OpenID Connect и автентикација на корисникот</a></li>
+<li class="toc-3"><a href="#section-11">1.7. Каде се појавуваат OAuth ранливостите?</a></li>
+<li class="toc-2"><a href="#section-12">2. Практичен дел</a></li>
+<li class="toc-3"><a href="#section-13">2.1. Избрана ранливост: OAuth Login CSRF поради недостасувачки state</a></li>
+<li class="toc-3"><a href="#section-14">2.2. Дефинирано лабораториско сценарио</a></li>
+<li class="toc-3"><a href="#section-15">2.3. Потребен хардвер и софтвер</a></li>
+<li class="toc-3"><a href="#section-16">2.4. Безбедносно предупредување и изолација</a></li>
+<li class="toc-3"><a href="#section-17">2.5. Подигнување на лабораториската околина</a></li>
+<li class="toc-3"><a href="#section-22">2.6. Нормално однесување на апликацијата</a></li>
+<li class="toc-3"><a href="#section-23">2.7. Експлоатација на ранливиот OAuth flow</a></li>
+<li class="toc-3"><a href="#section-27">2.8. Техничка причина за ранливоста</a></li>
+<li class="toc-3"><a href="#section-28">2.9. Примена и проверка на заштитата</a></li>
+<li class="toc-3"><a href="#section-29">2.10. Запирање и бришење на лабораториската околина</a></li>
+<li class="toc-3"><a href="#section-30">2.11. Заклучок од практичната анализа</a></li>
+<li class="toc-2"><a href="#section-31">3. JWT: формат, граници на доверба и типични грешки</a></li>
+<li class="toc-3"><a href="#section-32">3.1. Што е JWT и како се поврзува со OAuth?</a></li>
+<li class="toc-3"><a href="#section-33">3.2. Што мора да одлучи серверот?</a></li>
+<li class="toc-2"><a href="#section-34">4. Практичен дел: три JWT сценарија</a></li>
+<li class="toc-3"><a href="#section-35">4.1. Околина и безбедносни граници</a></li>
+<li class="toc-3"><a href="#section-36">4.2. Подигнување и запознавање со рутите</a></li>
+<li class="toc-3"><a href="#section-37">4.3. Сценарио А — alg: none</a></li>
+<li class="toc-3"><a href="#section-38">4.4. Сценарио Б — слаба HMAC тајна</a></li>
+<li class="toc-3"><a href="#section-39">4.5. Сценарио В — мешање на RS256 и HS256</a></li>
+<li class="toc-3"><a href="#section-40">4.6. Проверка, ограничувања и бришење</a></li>
+<li class="toc-2"><a href="#section-41">5. Заеднички заклучок</a></li>
+<li class="toc-2"><a href="#section-42">Користена литература</a></li>
+<li class="toc-2"><a href="#section-43">Прилог: лабораториски датотеки</a></li></ol></nav>
+
+<h2 id="section-2">Апстракт</h2>
+<p>Елаборатот испитува четири грешки во системи за најава и пристап: OAuth Login CSRF, прифаќање непотпишан JWT, слаба HMAC тајна и забуна меѓу асиметричен и симетричен потпис. За секое сценарио се дадени контролирана локална околина, чекори за репродукција, набљудуван резултат и споредба со заштитена варијанта. Целта е да се покаже каде апликацијата му верува на влез што не смее да ја одредува безбедносната одлука.</p>
+<h2 id="section-3">Вовед</h2>
+<p>Најавата преку надворешен провајдер и токените за пристап се вообичаен дел од современите веб-апликации. OAuth 2.0 го уредува делегирањето пристап, OpenID Connect додава стандардизиран идентитетски слој, а JWT е еден од форматите во кои може да се претстават тврдења. Ниту една од овие технологии не ја заменува проверката на контекстот во кој пристигнал одговорот. Погрешно поврзан OAuth callback или погрешно проверен JWT може да создаде валидна на изглед сесија за погрешен корисник.</p>
+<p>Практичниот дел користи две <strong>одвоени</strong>, локални лаборатории. Првата ја демонстрира последицата од callback без параметарот state; втората ги изолира трите JWT грешки. Овие лаборатории не се поврзани во еден продукциски OAuth/OIDC систем. Нивната улога е да овозможат безбедно и повторливо споредување на ранливо и поправено однесување. Сите тестови се насочени кон сервисите приложени со проектот.</p>
+<h2 id="section-4">1. Теоретска основа на OAuth 2.0 и OpenID Connect</h2>
+<h3 id="section-5">1.1. Што претставува OAuth 2.0?</h3>
+<p>OAuth 2.0 е рамка за делегирана авторизација. Неговата цел е на една апликација да ѝ овозможи ограничен пристап до ресурси што му припаѓаат на корисникот, без корисникот да ѝ ја открие својата лозинка.</p>
+<p>На пример, една веб-апликација може да побара дозвола да го прочита календарот на корисникот. Наместо корисникот да ги внесе своите Google или Microsoft корисничко име и лозинка директно во апликацијата, тој се пренасочува кон официјалниот сервер на давателот на услугата. По успешна најава и дадена согласност, апликацијата добива токен со ограничени привилегии.</p>
+<p>Важно е да се направи разлика меѓу:</p>
+<ul>
+<li><strong>автентикација</strong> – утврдување кој е корисникот;</li>
+<li><strong>авторизација</strong> – утврдување до кои ресурси и операции има пристап.</li>
+</ul>
+<p>OAuth 2.0 првенствено ја решава авторизацијата. Иако корисникот се најавува кај OAuth провајдерот, основниот OAuth протокол не му обезбедува на клиентот стандарден и сигурен доказ за идентитетот на корисникот. За таа цел се користи OpenID Connect.</p>
+<p>OAuth 2.0 ги дефинира улогите и размената на пораки, но не го пропишува форматот на секој токен. Поради тоа, access token може да биде JWT, но може да биде и случајна, непроѕирна вредност. OAuth и JWT не се ист концепт: OAuth е авторизациска рамка, додека JWT е формат за претставување потпишани тврдења.</p>
+<p>Основниот OAuth 2.0 модел е дефиниран во <a href="https://www.rfc-editor.org/rfc/rfc6749.html">RFC 6749</a>, додека современите безбедносни препораки се опишани во <a href="https://www.rfc-editor.org/rfc/rfc9700.html">RFC 9700</a>.</p>
+<h3 id="section-6">1.2. Учесници во OAuth 2.0</h3>
+<p>Во типично OAuth сценарио учествуваат следниве страни:</p>
+<ul>
+<li><strong>Resource Owner</strong> – корисникот кој е сопственик на податоците.</li>
+<li><strong>Client</strong> – апликацијата што бара пристап до податоците. Клиент е апликацијата, а не корисникот.</li>
+<li><strong>Authorization Server</strong> – серверот кој го автентицира корисникот, бара согласност и издава кодови и токени.</li>
+<li><strong>Resource Server</strong> – API-серверот на кој се наоѓаат заштитените податоци.</li>
+<li><strong>User Agent</strong> – најчесто веб-прелистувачот преку кој се извршуваат пренасочувањата.</li>
+</ul>
+<p>Во реални системи Authorization Server и Resource Server често припаѓаат на иста организација, но претставуваат различни логички улоги.</p>
+<figure class="diagram" aria-label="Улоги и движење на барањата во OAuth 2.0">
+    <figcaption>Слика 1. Учесници и насока на комуникација</figcaption>
+    <div class="roles">
+      <div><strong>Корисник</strong><small>Resource Owner</small></div>
+      <span aria-hidden="true">→</span>
+      <div><strong>Прелистувач</strong><small>User Agent</small></div>
+      <span aria-hidden="true">→</span>
+      <div><strong>Апликација</strong><small>OAuth Client</small></div>
+      <span aria-hidden="true">↔</span>
+      <div><strong>OAuth провајдер</strong><small>Authorization Server</small></div>
+    </div>
+    <p class="diagram-note"><strong>Одделна врска:</strong> апликацијата го испраќа access token до заштитеното API (Resource Server) за да ги добие дозволените податоци.</p>
+  </figure>
+<h3 id="section-7">1.3. Authorization Code Flow со PKCE</h3>
+<p>Во реални апликации се препорачува <strong>Authorization Code Flow со PKCE</strong>. Следниот дијаграм го прикажува референтниот, правилно заштитен тек. <strong>Лабораторијата подолу намерно имплементира поедноставен Authorization Code Flow без PKCE и OIDC</strong>, за да се изолира грешката со <code>state</code>; таа не е пример за целосна продукциска имплементација.</p>
+<p>Процесот започнува кога корисникот ќе избере опција како „Најави се со OAuth провајдер“. Клиентската апликација создава авторизациско барање и го пренасочува прелистувачот кон Authorization Server.</p>
+<p>Барањето вообичаено ги содржи следниве параметри:</p>
+<ul>
+<li><code>response_type=code</code> – означува дека клиентот бара authorization code;</li>
+<li><code>client_id</code> – јавен идентификатор на клиентската апликација;</li>
+<li><code>redirect_uri</code> – адресата на која ќе биде вратен прелистувачот;</li>
+<li><code>scope</code> – дозволите што ги бара апликацијата;</li>
+<li><code>state</code> – случајна вредност за поврзување на одговорот со започнатата сесија;</li>
+<li><code>code_challenge</code> – PKCE вредност добиена од таен <code>code_verifier</code>;</li>
+<li><code>code_challenge_method=S256</code> – означува дека се користи SHA-256.</li>
+</ul>
+<p><code>client_id</code> не е кориснички идентификатор и не е тајна. Тој само кажува која апликација го започнала OAuth процесот.</p>
+<p>По автентикацијата и согласноста, Authorization Server го пренасочува прелистувачот кон регистрираниот <code>redirect_uri</code>. Во URL-адресата се испраќаат <code>code</code> и претходно испратениот <code>state</code>.</p>
+<p>Authorization code е краткотрајна и еднократна вредност која клиентот не треба да ја анализира. Тој не претставува access token и сам по себе не содржи информации што апликацијата треба да ги користи. Неговата единствена цел е да биде заменет за токени преку token endpoint.</p>
+<figure class="diagram" aria-label="Референтен Authorization Code тек со PKCE">
+    <figcaption>Слика 2. Референтен тек: Authorization Code + PKCE</figcaption>
+    <div class="lane"><b>Front channel · преку прелистувач</b><ol>
+      <li>Клиентот создава <code>state</code>, <code>code_verifier</code> и <code>code_challenge</code>.</li>
+      <li>Прелистувачот оди на <code>/authorize</code> со <code>state</code> и <code>code_challenge</code>.</li>
+      <li>Провајдерот го најавува корисникот и враќа <code>code</code> + <code>state</code>.</li>
+    </ol></div>
+    <div class="lane lane-back"><b>Back channel · сервер кон сервер</b><ol start="4">
+      <li>Клиентот го проверува <code>state</code> и испраќа <code>code</code> + <code>code_verifier</code> до <code>/token</code>.</li>
+      <li>Провајдерот го проверува PKCE и издава access token.</li>
+      <li>Клиентот го користи токенот за пристап до API.</li>
+    </ol></div>
+  </figure>
+<p>Делот што поминува преку прелистувачот се нарекува <strong>front channel</strong>. Тој е изложен на историјата на прелистувачот, пренасочувања, екстензии, несигурни callback адреси и други потенцијални извори на протекување. Поради тоа, низ него се пренесува само краткотрајниот authorization code.</p>
+<p>Размената на кодот за токени се извршува преку <strong>back channel</strong>, од backend-от на клиентот директно кон token endpoint, преку HTTPS. Access token не треба да се враќа како параметар во URL-адресата.</p>
+<h3 id="section-8">1.4. Улогата на PKCE</h3>
+<p>PKCE – Proof Key for Code Exchange – го поврзува authorization code со конкретната апликациска сесија што го започнала процесот.</p>
+<p>Пред пренасочувањето, клиентот создава случаен <code>code_verifier</code>. Од него се пресметува <code>code_challenge</code>:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>code_challenge = BASE64URL(SHA256(code_verifier))</code></pre></div><p>Во првото барање се испраќа само <code>code_challenge</code>, додека оригиналниот <code>code_verifier</code> се чува кај клиентот. При размената на authorization code, клиентот мора да го достави соодветниот <code>code_verifier</code>.</p>
+<p>Доколку напаѓачот го пресретне authorization code, нема да може да го замени за access token без оригиналниот <code>code_verifier</code>. PKCE првично бил создаден за јавни мобилни клиенти, но современите препораки го бараат за јавни клиенти и го препорачуваат и за доверливи веб-клиенти. Треба да се користи методот <code>S256</code>, а не <code>plain</code>. Механизмот е дефиниран во <a href="https://www.rfc-editor.org/rfc/rfc7636.html">RFC 7636</a>, а неговата примена за сите видови клиенти е препорачана во <a href="https://www.rfc-editor.org/rfc/rfc9700.html">RFC 9700</a>.</p>
+<h3 id="section-9">1.5. Access token, refresh token и scope</h3>
+<p><strong>Access token</strong> е акредитив со кој клиентот пристапува до Resource Server. Тој вообичаено се испраќа во HTTP заглавието:</p>
+<div class="code-block"><span class="code-language">http</span><pre><code>Authorization: Bearer &lt;access_token&gt;</code></pre></div><p>Најголем дел од access token-ите се bearer tokens. Тоа значи дека секој што ќе дојде до токенот може да го употреби додека тој е валиден. Затоа access token не треба да се запишува во логови, да се става во URL-параметри или непотребно да се чува во прелистувачот. <a href="https://www.rfc-editor.org/rfc/rfc6750.html">RFC 6750</a> особено предупредува дека токените во URL можат да протечат преку browser history, серверски логови и други системи.</p>
+<p><strong>Scope</strong> го определува опсегот на доделениот пристап, на пример:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>scope=calendar.read profile</code></pre></div><p>Токенот треба да ги содржи само неопходните дозволи. Барање премногу широки scope-вредности го зголемува влијанието на евентуално компромитирање.</p>
+<p><strong>Refresh token</strong> се користи за добивање нов access token без повторна интеракција со корисникот. Поради неговиот подолг животен век, тој претставува особено чувствителен акредитив. Во server-side архитектура треба да остане на backend-от; кај мобилни и други јавни клиенти мора да се користи соодветно безбедно складирање и мерки како refresh token rotation или поврзување со конкретен испраќач.</p>
+<h3 id="section-10">1.6. OpenID Connect и автентикација на корисникот</h3>
+<p>OAuth access token му кажува на Resource Server кои операции се дозволени, но не е наменет да служи како доказ за најава во клиентската апликација.</p>
+<p><strong>OpenID Connect – OIDC</strong> е идентитетски слој изграден над OAuth 2.0. Тој се активира со додавање на scope-вредноста <code>openid</code>:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>scope=openid profile email</code></pre></div><p>Во тој случај, покрај access token, клиентот добива и <strong>ID token</strong>. ID token е JWT наменет за клиентската апликација и содржи тврдења како:</p>
+<ul>
+<li><code>iss</code> – кој провајдер го издал токенот;</li>
+<li><code>sub</code> – уникатен идентификатор на корисникот кај тој провајдер;</li>
+<li><code>aud</code> – клиентот за кој е издаден токенот;</li>
+<li><code>exp</code> – време на истекување;</li>
+<li><code>iat</code> – време на издавање;</li>
+<li><code>nonce</code> – вредност за поврзување со започнатото барање и заштита од повторување.</li>
+</ul>
+<p>Клиентот мора да го провери дигиталниот потпис, очекуваниот <code>iss</code>, сопствениот <code>client_id</code> во <code>aud</code>, времето на важност и <code>nonce</code>, кога тој бил употребен. Самото декодирање на JWT не претставува валидација.</p>
+<p>За локално идентификување на корисникот треба да се користи комбинацијата <code>iss</code> и <code>sub</code>, а не адресата за е-пошта, бидејќи е-поштата може да се промени или повторно да биде доделена. OpenID Connect е дефиниран во <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>.</p>
+<p>Во избраното server-side сценарио, по успешната проверка на ID token, backend-от го поврзува <code>sub</code> со запис во локалната база и создава сопствена апликациска сесија. Кон прелистувачот може да се испрати безбедно session cookie со <code>HttpOnly</code>, <code>Secure</code> и соодветна <code>SameSite</code> политика. Надворешниот ID token не треба некритички да се препраќа и да се користи како општ токен на самата апликација.</p>
+<h3 id="section-11">1.7. Каде се појавуваат OAuth ранливостите?</h3>
+<p>OAuth ранливостите најчесто не се резултат на слабост во самиот стандард, туку на погрешна имплементација, несигурна конфигурација или неточно поставени граници на доверба.</p>
+<p>Најзначајни извори на пропусти се:</p>
+<ol>
+<li><p><strong>Недостасувачки или неправилно поврзан <code>state</code></strong><br>Напаѓачот може да внесе сопствен OAuth одговор во сесијата на жртвата и да предизвика Login CSRF или погрешно поврзување кориснички сметки.</p>
+</li>
+<li><p><strong>Слаба проверка на <code>redirect_uri</code></strong><br>Ако Authorization Server дозволува делумно совпаѓање, wildcard адреси или произволни поддомени, authorization code може да биде испратен кон адреса под контрола на напаѓачот. Современите препораки бараат точно споредување со претходно регистрираната адреса.</p>
+</li>
+<li><p><strong>Отсуство на PKCE</strong><br>Украден или инјектиран authorization code може да се замени за токени. PKCE го спречува ова со поврзување на кодот со оригиналниот <code>code_verifier</code>.</p>
+</li>
+<li><p><strong>Протекување и повторна употреба на токени</strong><br>Access token може да протече преку URL, логови, browser history, JavaScript, несигурен storage или XSS. Кај bearer token, неговото поседување најчесто е доволно за пристап.</p>
+</li>
+<li><p><strong>OAuth се користи како протокол за најава без OIDC</strong><br>Клиентот може погрешно да претпостави дека секој валиден access token го идентификува тековниот корисник. Ова може да доведе до token substitution или прифаќање токен наменет за друго API.</p>
+</li>
+<li><p><strong>Неправилна валидација на ID token</strong><br>Ако не се проверат потписот, <code>iss</code>, <code>aud</code>, <code>exp</code> и <code>nonce</code>, апликацијата може да прифати токен издаден од погрешен провајдер, за друга апликација или за стара сесија.</p>
+</li>
+<li><p><strong>Несоодветно управување со client secret</strong><br>SPA и мобилните апликации се јавни клиенти. Тајна вградена во JavaScript код или мобилна апликација не може да се смета за доверлива.</p>
+</li>
+<li><p><strong>Стари или несигурни OAuth текови</strong><br>Современите препораки советуваат да не се користи Implicit Grant, затоа што access token се враќа преку front channel и е изложен на протекување. Resource Owner Password Credentials Grant не треба воопшто да се користи, бидејќи клиентот директно ја добива лозинката на корисникот. Наместо нив се користи Authorization Code Flow со PKCE.</p>
+</li>
+</ol>
+<p>Наведените пропусти служат како контекст. Во практичниот дел се испитува само Login CSRF; останатите не се експлоатираат во оваа лабораторија.</p>
+<h2 id="section-12">2. Практичен дел</h2>
+<h3 id="section-13">2.1. Избрана ранливост: OAuth Login CSRF поради недостасувачки <code>state</code></h3>
+<p>Практичниот дел демонстрира OAuth Login CSRF ранливост која се појавува кога клиентската апликација не го испраќа и не го проверува параметарот <code>state</code>.</p>
+<p>Во нормален OAuth процес, клиентот создава случајна <code>state</code> вредност пред да го пренасочи корисникот кон Authorization Server. Вредноста се чува во сесијата на корисникот и се испраќа во authorization request. Authorization Server ја враќа истата вредност заедно со authorization code. Клиентот смее да го продолжи процесот само ако вратениот <code>state</code> се совпаѓа со вредноста зачувана за истиот прелистувач.</p>
+<p>Ранливата апликација од оваа лабораторија воопшто не користи <code>state</code>. Поради тоа, таа прифаќа authorization code без да провери дали OAuth процесот бил започнат од истиот прелистувач. Напаѓачот може да започне најава со сопствената OAuth сметка, да го пресретне callback URL-от и потоа да ја наведе жртвата да го отвори. Апликацијата ќе создаде сесија во прелистувачот на жртвата, но таа сесија ќе биде поврзана со сметката на напаѓачот.</p>
+<p>Овој напад обично не му ја открива сметката на жртвата директно на напаѓачот. Опасноста е во тоа што жртвата може да внесе чувствителни податоци или да изврши дејства мислејќи дека работи во сопствената сметка. Податоците всушност се зачувуваат во сметката на напаѓачот, кој подоцна може да ги прочита.</p>
+<h3 id="section-14">2.2. Дефинирано лабораториско сценарио</h3>
+<p>Лабораторијата се состои од три намерно поедноставени веб-сервиси:</p>
+<table>
+<thead>
+<tr>
+<th>Компонента</th>
+<th>Адреса</th>
+<th>Улога</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LabID Authorization Server</td>
+<td><code>http://localhost:9000</code></td>
+<td>Го симулира OAuth провајдерот, издава authorization codes и access tokens</td>
+</tr>
+<tr>
+<td>OAuth Notes Client</td>
+<td><code>http://localhost:8000</code></td>
+<td>Клиентска апликација која содржи ранлив и заштитен OAuth flow</td>
+</tr>
+<tr>
+<td>Attacker Lab Site</td>
+<td><code>http://127.0.0.1:7000</code></td>
+<td>Страница под контрола на напаѓачот која ја доставува малициозната callback-врска</td>
+</tr>
+</tbody></table>
+<figure class="diagram" aria-label="Секвенца на лабораторискиот OAuth Login CSRF напад">
+    <figcaption>Слика 3. Редослед на дејствата при Login CSRF</figcaption>
+    <ol class="attack-flow">
+      <li><b>Напаѓач</b> започнува OAuth најава без <code>state</code> и добива code за својата сметка.</li>
+      <li><b>Attacker Site</b> подготвува врска што води до callback со тој code.</li>
+      <li><b>Жртва</b> ја отвора врската во одвоен прелистувачки профил.</li>
+      <li><b>Клиент</b> го прифаќа code и создава сесија како напаѓач.</li>
+      <li><b>Жртва</b> внесува белешка; <b>напаѓачот</b> ја чита во својата сметка.</li>
+    </ol>
+  </figure>
+<p>За да биде вежбата изводлива и за корисник без искуство со interception proxy, Authorization Server содржи опција <strong>Lab capture</strong>. Таа го прикажува callback URL-от наместо веднаш да го следи HTTP пренасочувањето. Во реално тестирање истата вредност би можела да се пресретне преку алатка како Burp Suite. Lab capture не ја создава ранливоста; тој само го поедноставува набљудувањето на OAuth одговорот.</p>
+<p><strong>Ограничувања на моделот:</strong> LabID ги симулира логирањето и согласноста со избор на една од две тест-сметки, без вистинска лозинка. Клиентот користи поедноставен профилен endpoint за демонстрациска сесија; ова <strong>не е OpenID Connect</strong> и не треба да се копира како начин за продукциска автентикација. Во лабораторијата нема PKCE, client authentication, refresh tokens или HTTPS. Тие механизми се изоставени за да се анализира само една ранливост; во реална апликација мора да се дизајнираат и проверуваат одделно. <code>localhost</code> и <code>127.0.0.1</code> се различни browser host-имиња: така страницата на напаѓачот не ги споделува cookies на клиентот, иако двата сервиса работат на ист компјутер. Cookies не се изолираат само по TCP-порта.</p>
+<h3 id="section-15">2.3. Потребен хардвер и софтвер</h3>
+<p>За изведување на лабораторијата се потребни:</p>
+<ul>
+<li>компјутер со најмалку 4 GB RAM-меморија (повеќе е препорачливо за Docker Desktop);</li>
+<li>Windows, macOS или Linux оперативен систем;</li>
+<li>Docker Desktop или Docker Engine со Docker Compose;</li>
+<li>современ веб-прелистувач со можност за отворање приватен/incognito прозорец;</li>
+<li>слободни локални TCP-порти <code>7000</code>, <code>8000</code> и <code>9000</code>;</li>
+<li>копија од директориумот <code>lab/oauth-csrf</code> што е приложен со проектот.</li>
+</ul>
+<p>Ако Docker не е инсталиран, треба да се преземе од <strong>официјалната</strong> документација за соодветниот систем: <a href="https://docs.docker.com/desktop/setup/install/windows-install/">Windows</a>, <a href="https://docs.docker.com/desktop/setup/install/mac-install/">macOS</a> или <a href="https://docs.docker.com/desktop/setup/install/linux/">Linux</a>. На Windows при инсталацијата се избира Linux-container backend (вообичаено WSL 2), а потоа се стартува Docker Desktop. На macOS се избира верзијата за Apple silicon или Intel според компјутерот. На Linux може да се користи Docker Desktop или Docker Engine со Compose plugin. Конкретните системски предуслови и инсталациски чекори зависат од верзијата на оперативниот систем; официјалните упатства треба да се следат пред продолжување.</p>
+<p>Инсталацијата може да се провери со следниве команди:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>docker --version
+docker compose version</code></pre></div><p>Двете команди треба да прикажат број на верзија. Ако се користи Docker Desktop, апликацијата мора да биде стартувана пред продолжување со вежбата.</p>
+<h3 id="section-16">2.4. Безбедносно предупредување и изолација</h3>
+<p>Околината е намерно ранлива и е наменета исклучиво за локална едукација. Не смее да се поставува на јавен сервер или да се користи за тестирање туѓи OAuth апликации и кориснички сметки без изречна дозвола.</p>
+<p>Лабораторијата ги објавува сервисите само на loopback-интерфејсот <code>127.0.0.1</code>. Поради тоа, тие се достапни од локалниот компјутер, но не и од други уреди во локалната мрежа. Контејнерите меѓусебно комуницираат преку посебна Docker bridge-мрежа. <strong>Ова не е целосна мрежна изолација:</strong> Docker bridge по правило може да овозможи излезен сообраќај. Ако се бара построга изолација од постоечки мрежи, вежбата треба да се изведе во одделна виртуелна машина или на тест-компјутер без мрежна врска по преземањето на основната Docker слика. Во лабораторијата не треба да се внесуваат вистински лозинки, токени или лични податоци.</p>
+<p>Сите authorization codes, access tokens, сесии и белешки се чуваат само во RAM-меморијата на сервисите. Тие исчезнуваат кога контејнерите ќе бидат запрени. Не се користат Docker volumes и не се менува конфигурацијата на оперативниот систем.</p>
+<h3 id="section-17">2.5. Подигнување на лабораториската околина</h3>
+<h4 id="section-18">Чекор 1: Отворање терминал</h4>
+<p>На Windows може да се користи PowerShell, а на macOS или Linux апликацијата Terminal. За првото подигнување е потребна интернет-врска за преземање на официјалната Node.js Docker слика, освен ако таа веќе е локално зачувана.</p>
+<h4 id="section-19">Чекор 2: Позиционирање во лабораторискиот директориум</h4>
+<p>Во управувачот со датотеки пронајдете ја папката на проектот, а во неа <code>lab/oauth-csrf</code>. Отворете терминал <strong>во таа папка</strong>. На Windows, во File Explorer може да се кликне во адресната лента на папката, да се внесе <code>powershell</code> и да се притисне Enter. На macOS/Linux може да се отвори Terminal и да се внесе <code>cd </code> (со празно место), да се повлече папката <code>oauth-csrf</code> во прозорецот и да се притисне Enter.</p>
+<p>Проверете дека сте во правилната папка:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>docker compose config --services</code></pre></div><p>Очекуваниот излез содржи <code>auth-server</code>, <code>client</code> и <code>attacker-site</code>. Ако командата јави дека нема <code>compose.yaml</code>, терминалот е отворен во погрешна папка.</p>
+<h4 id="section-20">Чекор 3: Градење и стартување на сервисите</h4>
+<div class="code-block"><span class="code-language">bash</span><pre><code>docker compose up --build</code></pre></div><p>При првото стартување Docker може да ја преземе основната Node.js слика, поради што е потребна интернет-врска. По успешно стартување треба да се појават пораки слични на:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>LabID Authorization Server listening on 9000
+OAuth client listening on 8000
+Attacker lab site listening on 7000</code></pre></div><p>Терминалот треба да остане отворен додека се изведува вежбата.</p>
+<h4 id="section-21">Чекор 4: Проверка на сервисите</h4>
+<p>Во прелистувачот одделно се отвораат:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>http://127.0.0.1:7000
+http://localhost:8000
+http://localhost:9000</code></pre></div><p>Секоја адреса треба да прикаже различна страница. Ако некоја страница не се отвора, треба да се провери дали Docker е стартуван и дали некоја друга апликација ја користи соодветната порта.</p>
+<h3 id="section-22">2.6. Нормално однесување на апликацијата</h3>
+<p>Пред нападот може да се провери нормалниот OAuth процес:</p>
+<ol>
+<li>Се отвора <code>http://localhost:8000</code>.</li>
+<li>Се избира <strong>Ранлива OAuth најава</strong>.</li>
+<li>Authorization Server прикажува две лабораториски сметки.</li>
+<li>Се избира <strong>Најави се како жртва</strong>.</li>
+<li>Прелистувачот се враќа во клиентската апликација.</li>
+<li>Во полето „Активна апликациска сесија“ треба да биде прикажано името <strong>Виктор Жртва</strong> и subject <code>user-victim</code>.</li>
+<li>Се избира <strong>Одјави се</strong> пред започнување на нападот.</li>
+</ol>
+<p>Овој тест потврдува дека Authorization Code Flow функционира, но сè уште не покажува дали callback-от е поврзан со прелистувачот што ја започнал трансакцијата.</p>
+<h3 id="section-23">2.7. Експлоатација на ранливиот OAuth flow</h3>
+<p>За правилно да се симулираат два различни корисници, напаѓачот се претставува со нормалниот прозорец на прелистувачот, а жртвата со нов приватен/incognito прозорец. Не треба да се користи обичен втор tab, бидејќи може да ги сподели cookies од истиот browser-профил.</p>
+<h4 id="section-24">Фаза А: Напаѓачот создава малициозна callback-врска</h4>
+<ol>
+<li><p>Во нормален прозорец се отвора <code>http://127.0.0.1:7000</code>.</p>
+</li>
+<li><p>Се избира <strong>Подготви напад врз ранливиот flow</strong>.</p>
+</li>
+<li><p>Клиентот започнува OAuth процес без параметар <code>state</code> и го отвора LabID Authorization Server.</p>
+</li>
+<li><p>Се избира <strong>Најави се како напаѓач</strong>.</p>
+</li>
+<li><p>Наместо автоматско пренасочување, Lab capture прикажува URL сличен на:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>http://localhost:8000/callback?code=&lt;случајна-вредност&gt;</code></pre></div></li>
+<li><p>Ова е валиден, краткотраен и еднократен authorization code издаден за сметката на напаѓачот. Callback-врската не треба директно да се отвори во прозорецот на напаѓачот, бидејќи кодот би бил потрошен.</p>
+</li>
+<li><p>Се избира <strong>Пренеси ја во страницата на напаѓачот</strong>.</p>
+</li>
+<li><p>Attacker Site прикажува exploit-врска која го пренасочува посетителот кон пресретнатиот callback.</p>
+</li>
+</ol>
+<h4 id="section-25">Фаза Б: Жртвата ја отвора exploit-врската</h4>
+<ol>
+<li><p>Во нормалниот прозорец се копира <strong>целата</strong> exploit-врска што почнува со <code>http://127.0.0.1:7000/deliver?target=...</code>. Не се притиска копчето за отворање во тој прозорец.</p>
+</li>
+<li><p>Се отвора нов приватен/incognito прозорец. Тој прозорец ја претставува жртвата и нема OAuth state или апликациска сесија од прозорецот на напаѓачот.</p>
+</li>
+<li><p>Копираната exploit-врска се внесува во адресната лента на приватниот прозорец и се притиска Enter. Врската мора да се отвори пред да истече authorization code; ако истече, фазата А се повторува.</p>
+</li>
+<li><p>Attacker Site го пренасочува прелистувачот кон:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>http://localhost:8000/callback?code=&lt;attacker-code&gt;</code></pre></div></li>
+<li><p>Ранливиот клиент го прифаќа кодот без да провери <code>state</code>.</p>
+</li>
+<li><p>Клиентот го испраќа кодот до token endpoint и добива access token за OAuth сметката на напаѓачот.</p>
+</li>
+<li><p>Во прелистувачот на жртвата се создава нова локална сесија.</p>
+</li>
+<li><p>Како активен корисник треба да се прикаже <strong>Алекс Напаѓач</strong>, иако жртвата никогаш не избрала најава со таа сметка.</p>
+</li>
+</ol>
+<p>Ова е моментот кога нападот е успешно извршен.</p>
+<h4 id="section-26">Фаза В: Демонстрација на влијанието</h4>
+<ol>
+<li><p>Во приватниот прозорец, во полето за нова белешка се внесува:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>Доверлива белешка внесена од жртвата</code></pre></div></li>
+<li><p>Се избира <strong>Зачувај</strong>.</p>
+</li>
+<li><p>Приватниот прозорец се затвора.</p>
+</li>
+<li><p>Во нормалниот прозорец на напаѓачот се отвора <code>http://localhost:8000</code>.</p>
+</li>
+<li><p>Ако нема активна сесија, се избира <strong>Ранлива OAuth најава</strong>, а потоа <strong>Најави се како напаѓач</strong>. Овојпат не се користи Lab capture.</p>
+</li>
+<li><p>Во листата со приватни белешки на сметката на напаѓачот се појавува текстот што го внела жртвата.</p>
+</li>
+</ol>
+<p>Со ова се покажува практичното влијание: жртвата внела доверлив податок во сметка контролирана од напаѓачот.</p>
+<table>
+<thead>
+<tr>
+<th>Проверка</th>
+<th>Очекуван доказ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ранлив callback во приватниот прозорец</td>
+<td>Активен корисник: <strong>Алекс Напаѓач</strong></td>
+</tr>
+<tr>
+<td>Внесување белешка од жртвата</td>
+<td>Белешката е зачувана под <code>user-attacker</code></td>
+</tr>
+<tr>
+<td>Нова најава на напаѓачот</td>
+<td>Истата белешка е видлива во неговата сметка</td>
+</tr>
+<tr>
+<td>Ист напад врз заштитениот callback</td>
+<td>HTTP <code>403</code>; OAuth одговорот е одбиен</td>
+</tr>
+<tr>
+<td>Легитимна заштитена најава</td>
+<td>Клиентот прикажува <strong>Виктор Жртва</strong></td>
+</tr>
+</tbody></table>
+<h3 id="section-27">2.8. Техничка причина за ранливоста</h3>
+<p>Ранливиот login endpoint создава authorization request без <code>state</code>:</p>
+<div class="code-block"><span class="code-language">javascript</span><pre><code>if (req.method === &#39;GET&#39; &amp;&amp; url.pathname === &#39;/login&#39;) {
+  return redirect(
+    res,
+    authorizationUrl(VULNERABLE_REDIRECT, capture)
+  );
+}</code></pre></div><p>Callback endpoint-от проверува само дали е присутен authorization code. Не постои доказ дека истиот прелистувач претходно го започнал OAuth процесот. Следниот извадок е <strong>псевдокод</strong>, скратен од имплементацијата во <code>lab/oauth-csrf/client.js</code>:</p>
+<div class="code-block"><span class="code-language">javascript</span><pre><code>if (req.method === &#39;GET&#39; &amp;&amp; url.pathname === &#39;/callback&#39;) {
+  const code = url.searchParams.get(&#39;code&#39;);
+  const user = await exchangeCode(code, VULNERABLE_REDIRECT);
+  createApplicationSession(user);
+}</code></pre></div><p>Authorization Server издал валиден код и кодот правилно се заменува за access token. Проблемот е што кодот е издаден за OAuth трансакцијата на напаѓачот, додека локалната сесија се создава во прелистувачот на жртвата. Клиентот нема вредност со која би ги поврзал овие две операции.</p>
+<h3 id="section-28">2.9. Примена и проверка на заштитата</h3>
+<p>Заштитената варијанта ја применува следнава постапка:</p>
+<ol>
+<li>создава криптографски случајна <code>state</code> вредност;</li>
+<li>ја зачувува во краткотрајна <code>HttpOnly</code> и <code>SameSite=Lax</code> cookie-вредност поврзана со прелистувачот;</li>
+<li>ја испраќа <code>state</code> вредноста во authorization request;</li>
+<li>бара Authorization Server да ја врати во callback URL-от;</li>
+<li>пред размена на кодот проверува дали вратениот <code>state</code> точно се совпаѓа со зачуваниот;</li>
+<li>по употребата ја брише вредноста за да не може повторно да се искористи.</li>
+</ol>
+<p>Поедноставена проверка изгледа вака:</p>
+<div class="code-block"><span class="code-language">javascript</span><pre><code>const returnedState = url.searchParams.get(&#39;state&#39;);
+const expectedState = cookies.oauth_state;
+
+if (!returnedState || !expectedState || returnedState !== expectedState) {
+  return rejectOAuthResponse();
+}</code></pre></div><p>За проверка на заштитата се повторува истиот напад:</p>
+<ol>
+<li>Во нормалниот прозорец се отвора <code>http://127.0.0.1:7000</code>.</li>
+<li>Се избира <strong>Обиди се врз заштитениот flow</strong>.</li>
+<li>Кај LabID се избира <strong>Најави се како напаѓач</strong>.</li>
+<li>Се избира <strong>Пренеси ја во страницата на напаѓачот</strong>.</li>
+<li>Новата exploit-врска се отвора во нов приватен/incognito прозорец.</li>
+<li>Наместо успешна најава, клиентот враќа HTTP статус <code>403</code> и ја прикажува пораката <strong>OAuth одговорот е одбиен</strong>.</li>
+</ol>
+<p>Нападот е блокиран бидејќи <code>state</code> во URL-от е создаден во прелистувачот на напаѓачот, додека приватниот прозорец на жртвата ја нема соодветната <code>oauth_state</code> cookie-вредност.</p>
+<p>Во продукциска апликација се препорачуваат и следниве мерки:</p>
+<ul>
+<li><code>state</code> да биде случаен, непредвидлив, еднократен и со краток рок на важност;</li>
+<li>вредноста да биде врзана за конкретната browser-сесија и OAuth трансакција, по можност преку серверски зачувана pending-трансакција;</li>
+<li>да се користи Authorization Code Flow со PKCE и метод <code>S256</code>;</li>
+<li><code>redirect_uri</code> да се проверува со точно совпаѓање;</li>
+<li>callback endpoint-от да користи HTTPS;</li>
+<li>апликациските cookies да ги имаат соодветните <code>Secure</code>, <code>HttpOnly</code> и <code>SameSite</code> атрибути;</li>
+<li>токените да не се запишуваат во URL, browser history или апликациски логови;</li>
+<li>да се применат ограничени scope-вредности и краткотрајни access tokens;</li>
+<li>да се користи добро одржувана OAuth/OIDC библиотека наместо рачна имплементација на протоколот.</li>
+</ul>
+<p>Според <a href="https://www.rfc-editor.org/rfc/rfc9700.html">RFC 9700, секција 2.1 и 4.7</a>, CSRF заштитата може да се обезбеди и преку <strong>правилно имплементиран PKCE</strong>, ако клиентот однапред потврдил дека провајдерот го поддржува и ако verifier-от е специфичен за трансакцијата и врзан за истиот прелистувач. Во оваа лабораторија PKCE не се имплементира; затоа <code>state</code> е главниот демонстриран механизам. Поуката не е дека буквално секоја OAuth апликација мора истовремено да има и <code>state</code> и PKCE, туку дека мора да има сигурна заштита од CSRF и злоупотреба на authorization code.</p>
+<p><code>SameSite</code> cookies можат да обезбедат дополнителна заштита, но не треба да се користат како замена за правилна OAuth transaction binding проверка.</p>
+<h3 id="section-29">2.10. Запирање и бришење на лабораториската околина</h3>
+<p>По завршување на вежбата, во терминалот каде што работи Docker Compose се притиска <code>Ctrl+C</code>.</p>
+<p>Потоа се извршува:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>docker compose down --rmi local</code></pre></div><p>Командата ги запира и ги брише контејнерите, локалната Docker мрежа и сликата изградена за лабораторијата. Бидејќи не се користат volumes, не остануваат лабораториски корисници, белешки, OAuth codes или tokens.</p>
+<p>За да се провери дека сервисите се изгасени, може повторно да се отвори <code>http://localhost:8000</code>. Прелистувачот треба да прикаже дека страницата не е достапна.</p>
+<h3 id="section-30">2.11. Заклучок од практичната анализа</h3>
+<p>Експериментот покажува дека валиден authorization code не е доволен доказ дека тековниот прелистувач ја започнал OAuth трансакцијата. Без <code>state</code>, клиентот може да прифати код создаден во сесија на напаѓачот и да го поврзе со сесијата на жртвата.</p>
+<p>Последицата во прикажаното сценарио е внесување доверливи податоци во сметка контролирана од напаѓачот. Во други апликации истиот пропуст може да предизвика несакани дејства, погрешно поврзување профили или преземање сметка кога ранливоста се појавува во OAuth account-linking функционалност.</p>
+<p>Повторувањето на нападот врз заштитениот flow потврдува дека случајна, еднократна и правилно проверена <code>state</code> вредност го поврзува OAuth одговорот со прелистувачот што го започнал процесот и го блокира Login CSRF нападот.</p>
+<h2 id="section-31">3. JWT: формат, граници на доверба и типични грешки</h2>
+<h3 id="section-32">3.1. Што е JWT и како се поврзува со OAuth?</h3>
+<p>JSON Web Token (JWT) е формат за пренос на тврдења (<em>claims</em>). Најчестата форма е потпишан токен составен од три Base64URL-енкодирани дела:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>header.payload.signature</code></pre></div><p>Во <code>header</code> се наведува, меѓу другото, алгоритмот <code>alg</code>. Во <code>payload</code> може да стојат кориснички идентификатор, улога, издавач (<code>iss</code>), примач (<code>aud</code>) и време на истекување (<code>exp</code>). Третиот дел е потпис. Првите два дела <strong>не се шифрирани</strong>: секој што го поседува токенот може да ги прочита. Потписот служи за проверка дека содржината не е изменета и дека е потпишана со очекуваниот клуч; тој не ја крие содржината [6].</p>
+<p>OAuth 2.0 и JWT не се заменливи поими. OAuth го уредува добивањето делегиран пристап, додека JWT е можен формат на токен. OAuth access token може да биде и непроѕирна случајна низа. Кај OpenID Connect, ID token е JWT што клиентот го проверува за да го утврди идентитетот на корисникот. Ако JWT-проверката е погрешна, дури и добро изведениот OAuth тек може да заврши со прифаќање фалсификуван идентитет или привилегија.</p>
+<p>Во оваа лабораторија се проверуваат три одделни грешки: прифаќање <code>alg: none</code>, користење слаба HMAC тајна и мешање на RS256 со HS256. Тие се документирани како класични JWT имплементациски ризици во <a href="https://www.rfc-editor.org/rfc/rfc8725.html">RFC 8725</a>. Лабораторијата не тврди дека современа JWT библиотека стандардно ги содржи овие пропусти. Ранливите проверки се намерно напишани рачно, за точно да се види погрешната одлука на серверот.</p>
+<h3 id="section-33">3.2. Што мора да одлучи серверот?</h3>
+<p>Серверот однапред треба да знае каков токен очекува: од кој издавач, за која апликација, со кој алгоритам и со кој клуч. Полето <code>alg</code> во токенот е податок доставен од испраќачот, а не дозвола серверот да смени начин на проверка. При валидација се проверуваат и релевантните claims, вклучително <code>iss</code>, <code>aud</code>, <code>exp</code> и <code>nbf</code> кога се применливи. Декодирање на <code>payload</code> без проверка на потписот не е автентикација.</p>
+<p>Практичните напади подолу се сведени на грешките во изборот на алгоритам и клуч. Затоа тест-токените не содржат временски claims. Во вистинска апликација тоа би било дополнителен недостаток; изворниот код од лабораторијата <strong>не смее</strong> да се земе како комплетен пример за безбеден JWT валидатор.</p>
+<h2 id="section-34">4. Практичен дел: три JWT сценарија</h2>
+<h3 id="section-35">4.1. Околина и безбедносни граници</h3>
+<p>Потребни се Docker со Compose, слободна локална порта <code>3000</code>, терминал и Python 3 на основниот систем. Node.js работи внатре во контејнерот, па не треба посебна локална инсталација. Доволни се 4 GB RAM за двата лабораториски дела. На Windows командите се извршуваат во WSL2/Ubuntu; на macOS и Linux во Terminal. Проверката на Docker е опишана во секција 2.3. За Python извршете <code>python3 --version</code>; ако командата не постои, инсталирајте Python 3 од <a href="https://www.python.org/downloads/">официјалната страница</a> или преку системскиот пакетен менаџер. Скриптата користи само стандардни Python модули — не треба PyJWT или други пакети.</p>
+<p>JWT апликацијата е намерно ранлива. Не ја поставувајте на јавен сервер, не ја врзувајте на <code>0.0.0.0</code> на домаќинот и не внесувајте вистински податоци. Во <code>lab/jwt/compose.yaml</code> портата е објавена само на <code>127.0.0.1:3000</code>. Docker bridge-мрежата не гарантира целосна изолација од интернет; за построг услов користете одделна виртуелна машина без мрежна врска откако ќе ја преземете основната слика. Лабораторијата не создава volumes. RSA клучевите и силната HMAC тајна се создаваат во меморија при стартување и се губат по запирањето.</p>
+<h3 id="section-36">4.2. Подигнување и запознавање со рутите</h3>
+<p>Отворете терминал во папката <code>lab/jwt</code> од приложениот проект. На Windows, во File Explorer отворете ја папката и внесете <code>wsl</code> во адресната лента; на macOS/Linux внесете <code>cd </code> и повлечете ја папката во Terminal. Проверете ја локацијата:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>docker compose config --services</code></pre></div><p>Очекуваниот излез е <code>jwt-lab</code>. Потоа стартувајте:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>docker compose up --build -d
+docker compose ps</code></pre></div><p>При првото стартување Docker ја презема Node.js сликата ако не е локално достапна. Во <code>docker compose ps</code> сервисот треба да има статус <code>Up</code>. Отворете <code>http://127.0.0.1:3000</code> во прелистувач или извршете <code>curl http://127.0.0.1:3000/</code>; се враќа JSON со имињата на рутите. Ако портата е зафатена, најпрво запрете ја апликацијата што ја користи; не менувајте ја Compose врската кон јавен интерфејс.</p>
+<table>
+<thead>
+<tr>
+<th>Рута</th>
+<th>Намена</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /login</code></td>
+<td>Издава HS256 токен за тест-корисник со улога <code>user</code></td>
+</tr>
+<tr>
+<td><code>GET /admin</code></td>
+<td>Намерно прифаќа непотпишан токен (<code>alg: none</code>)</td>
+</tr>
+<tr>
+<td><code>GET /admin-alg-safe</code></td>
+<td>Прифаќа само HS256, но сè уште користи слаба тајна</td>
+</tr>
+<tr>
+<td><code>GET /admin-secret-safe</code></td>
+<td>Прифаќа HS256 со случајна 32-бајтна тајна</td>
+</tr>
+<tr>
+<td><code>GET /rsa-token</code></td>
+<td>Враќа примерен RS256 токен и јавен RSA клуч</td>
+</tr>
+<tr>
+<td><code>GET /confusion-demo</code></td>
+<td>Намерно го прифаќа јавниот RSA клуч како HMAC тајна</td>
+</tr>
+<tr>
+<td><code>GET /confusion-demo-safe</code></td>
+<td>Прифаќа само RS256 со јавниот RSA клуч</td>
+</tr>
+</tbody></table>
+<p>Во терминалот понатаму работете од истата папка. На некои Windows инсталации командата е <code>python</code> наместо <code>python3</code>; заменете ја само првата зборовна единица во командите ако е потребно.</p>
+<h3 id="section-37">4.3. Сценарио А — <code>alg: none</code></h3>
+<p>Токен со <code>alg: none</code> нема потпис. Во ранливата функција <code>verifyVulnerableNone()</code> во <code>app.js</code>, серверот гледа што пишува во header-от и, ако вредноста е <code>none</code>, го враќа payload-от без криптографска проверка. Напаѓачот затоа може да запише <code>role: admin</code> во свој токен. Ова не е „пробивање“ на HMAC; проверката целосно се прескокнува.</p>
+<p>Извршете:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>python3 attacks.py none</code></pre></div><p>Скриптата составува два Base64URL дела и остава празен трет дел (токенот завршува со точка). Го испраќа истиот токен до двете рути. Очекуваниот резултат е:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>Ранлива /admin: HTTP 200 — {&quot;message&quot;:&quot;Добредојде, attacker&quot;,&quot;role&quot;:&quot;admin&quot;}
+Заштитена /admin-alg-safe: HTTP 401 — {&quot;error&quot;:&quot;Недозволен алгоритам&quot;}</code></pre></div><p>Првата рута ја прифаќа измислената улога. Втората однапред бара HS256 и одбива токен без потпис. Во продукциски систем ова треба да го спроведува одржувана JWT библиотека со експлицитно конфигуриран дозволен алгоритам, не рачна проверка на текстот во header-от [7].</p>
+<h3 id="section-38">4.4. Сценарио Б — слаба HMAC тајна</h3>
+<p>HS256 користи симетричен клуч: истиот таен клуч е потребен за потпишување и проверка. Ако клучот е погодлив збор, напаѓач со еден валиден токен може <strong>офлајн</strong> да пресметува HMAC за кандидатите и да ги споредува со потписот. Нема потреба да испраќа многу барања до серверот. Во лабораторијата намерно е поставена вредноста <code>secret123</code>.</p>
+<p>Извршете:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>python3 attacks.py weak</code></pre></div><p>Скриптата најпрво прави легитимна тест-најава како <code>alice</code> со лозинка <code>demo-pass</code>, потоа пробува шест кратки кандидати. Кога потписот ќе се совпадне, создава нов токен со <code>role: admin</code>. Очекувано:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>Пронајдена слаба тајна: &#39;secret123&#39; (обид 4)
+Слаб клуч и фиксен алгоритам: HTTP 200 — ...
+Силен клуч и фиксен алгоритам: HTTP 401 — ...</code></pre></div><p>Овој случај е важен затоа што <code>/admin-alg-safe</code> <strong>правилно</strong> го ограничува алгоритмот, но сепак го прифаќа фалсификуваниот токен: потписот навистина е пресметан со истиот слаб клуч. За споредба, <code>/admin-secret-safe</code> користи криптографски случајна 32-бајтна HMAC тајна и го одбива истиот токен. Во вистински систем тајната треба да се генерира со криптографски сигурен генератор, да се чува надвор од изворниот код, да не се користи за повеќе издавачи и да се ротира по компромитирање. <a href="https://www.rfc-editor.org/rfc/rfc8725.html#section-3.5">RFC 8725, секција 3.5</a> предупредува да не се употребуваат човечки запаметливи лозинки како HMAC клучеви.</p>
+<h3 id="section-39">4.5. Сценарио В — мешање на RS256 и HS256</h3>
+<p>Кај RS256 издавачот потпишува со <strong>приватен</strong> RSA клуч, а примачот проверува со соодветниот <strong>јавен</strong> клуч. Јавниот клуч не е тајна. Ранливата функција <code>verifyVulnerableConfusion()</code> погрешно дозволува токенот да избере HS256 и тогаш го користи текстот на јавниот RSA клуч како HMAC тајна. Напаѓач што го знае јавниот клуч може да изработи валиден HMAC потпис за измислен admin payload. Токму овој вид забуна е опишан во <a href="https://www.rfc-editor.org/rfc/rfc8725.html#section-2.1">RFC 8725, секција 2.1</a>.</p>
+<p>Извршете:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>python3 attacks.py confusion</code></pre></div><p>Скриптата го зема јавниот клуч од <code>/rsa-token</code>, создава HS256 токен со тој клуч како HMAC тајна и го испраќа до ранливата и заштитената рута. Очекувано:</p>
+<div class="code-block"><span class="code-language">text</span><pre><code>Ранлива /confusion-demo: HTTP 200 — {&quot;role&quot;:&quot;admin&quot;, ...}
+Заштитена /confusion-demo-safe: HTTP 401 — {&quot;error&quot;:&quot;Недозволен алгоритам&quot;}</code></pre></div><p>Заштитената рута прифаќа само RS256. Дури и ако токенот тврди дека користи HS256, таа нема да го употреби јавниот клуч како симетрична тајна. Во реална OIDC интеграција јавните клучеви често се објавуваат преку JWKS; тоа е очекувано и само по себе не е слабост. Слабоста е погрешната употреба на клучот во валидаторот.</p>
+<h3 id="section-40">4.6. Проверка, ограничувања и бришење</h3>
+<p>Сите три проверки може да се пуштат одеднаш:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>python3 attacks.py all</code></pre></div><p>Скриптата завршува без Python грешка само ако се добијат очекуваните HTTP статуси: <code>200</code> на трите ранливи проверки и <code>401</code> на соодветните заштитени проверки. Тестот ја потврдува конкретната лабораториска логика, но не претставува пенетрационен тест на вистински OAuth/OIDC провајдер.</p>
+<p>По завршувањето, во истата папка извршете:</p>
+<div class="code-block"><span class="code-language">bash</span><pre><code>docker compose down --rmi local</code></pre></div><p>Командата ги отстранува JWT контејнерот, неговата Docker мрежа и локално изградената лабораториска слика. Не се користат volumes. Проверете со <code>docker compose ps</code> дека сервисот веќе не работи. Командата не ја брише основната преземена Node.js слика и не е тврдење дека компјутерот е во апсолутно идентична состојба како пред инсталацијата на Docker.</p>
+<h2 id="section-41">5. Заеднички заклучок</h2>
+<p>OAuth и JWT пропустите во овој елаборат се појавуваат на различни места. Кај Login CSRF, клиентот прифаќа OAuth одговор без да провери дека прелистувачот ја започнал истата трансакција. Кај JWT примерите, серверот или му дозволува на токенот да ја диктира криптографската проверка, или користи предвидлив HMAC клуч. Резултатите од локалните вежби се сумирани подолу.</p>
+<table>
+<thead>
+<tr>
+<th>Сценарио</th>
+<th>Набљудуван исход</th>
+<th>Потребна заштита</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OAuth Login CSRF</td>
+<td>Жртвата се најавува во сметка на напаѓачот</td>
+<td>Трансакциски врзан <code>state</code> или соодветно имплементиран PKCE</td>
+</tr>
+<tr>
+<td>JWT <code>alg: none</code></td>
+<td>Непотпишан admin токен е прифатен</td>
+<td>Фиксен дозволен алгоритам и проверен потпис</td>
+</tr>
+<tr>
+<td>JWT слаба тајна</td>
+<td>Фалсификуван HS256 токен е прифатен</td>
+<td>Силен, случаен и заштитен HMAC клуч</td>
+</tr>
+<tr>
+<td>JWT RS256→HS256</td>
+<td>Јавен RSA клуч е злоупотребен како HMAC тајна</td>
+<td>Строго одделување на алгоритам и тип на клуч</td>
+</tr>
+</tbody></table>
+<p>За продукциска имплементација не е доволно да се пренесат само овие поправки. Потребни се и HTTPS, ограничени дозволи и рокови на токените, проверка на <code>iss</code>/<code>aud</code>/<code>exp</code>, соодветно управување со клучевите, безбедно складирање на сесии и редовно ажурирани библиотеки. Најважно е секој одговор и секој токен да се проверува според контекст што серверот го утврдил <strong>пред</strong> да го добие непроверениот влез.</p>
+<h2 id="section-42">Користена литература</h2>
+<ol>
+<li>D. Hardt, <a href="https://www.rfc-editor.org/rfc/rfc6749.html">RFC 6749: The OAuth 2.0 Authorization Framework</a>, IETF, 2012.</li>
+<li>T. Lodderstedt et al., <a href="https://www.rfc-editor.org/rfc/rfc9700.html">RFC 9700: Best Current Practice for OAuth 2.0 Security</a>, IETF, 2025.</li>
+<li>N. Sakimura et al., <a href="https://www.rfc-editor.org/rfc/rfc7636.html">RFC 7636: Proof Key for Code Exchange</a>, IETF, 2015.</li>
+<li>M. Jones и D. Hardt, <a href="https://www.rfc-editor.org/rfc/rfc6750.html">RFC 6750: Bearer Token Usage</a>, IETF, 2012.</li>
+<li>OpenID Foundation, <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>, финална спецификација.</li>
+<li>M. Jones, J. Bradley и N. Sakimura, <a href="https://www.rfc-editor.org/rfc/rfc7519.html">RFC 7519: JSON Web Token</a>, IETF, 2015.</li>
+<li>Y. Sheffer, D. Hardt и M. Jones, <a href="https://www.rfc-editor.org/rfc/rfc8725.html">RFC 8725: JSON Web Token Best Current Practices</a>, IETF, 2020.</li>
+<li>OWASP, <a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html">JSON Web Token Cheat Sheet</a>.</li>
+</ol>
+<h2 id="section-43">Прилог: лабораториски датотеки</h2>
+<ul>
+<li><a href="lab/oauth-csrf/"><code>lab/oauth-csrf/</code></a> — OAuth Login CSRF лабораторијата од Дел I.</li>
+<li><a href="lab/jwt/compose.yaml"><code>lab/jwt/compose.yaml</code></a> — Docker конфигурација за JWT лабораторијата.</li>
+<li><a href="lab/jwt/app.js"><code>lab/jwt/app.js</code></a> — намерно ранливи и споредбени проверки.</li>
+<li><a href="lab/jwt/attacks.py"><code>lab/jwt/attacks.py</code></a> — репродукција на трите напади со Python 3.</li>
+</ul>
+</article>
+    <p class="footnote">Елаборатот е наменет за локална, изолирана лабораториска употреба. Практичниот код не е продукциска OAuth или JWT имплементација.</p>
+  </main>
+</body>
+</html>
