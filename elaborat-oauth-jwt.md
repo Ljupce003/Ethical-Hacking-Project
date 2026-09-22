@@ -14,6 +14,8 @@
 
 Практичниот дел користи две **одвоени**, локални лаборатории. Првата ја демонстрира последицата од callback без параметарот state; втората ги изолира трите JWT грешки. Овие лаборатории не се поврзани во еден продукциски OAuth/OIDC систем. Нивната улога е да овозможат безбедно и повторливо споредување на ранливо и поправено однесување. Сите тестови се насочени кон сервисите приложени со проектот.
 
+Комплетните лабораториски датотеки за практичниот дел се достапни во јавниот GitHub репозиториум: [Ethical-Hacking-Project — lab](https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab). Пред започнување на вежбите треба да се преземе репозиториумот или директориумот lab, во кој се наоѓаат OAuth и JWT околините.
+
 ## 1. Теоретска основа на OAuth 2.0 и OpenID Connect
 
 ### 1.1. Што претставува OAuth 2.0?
@@ -664,7 +666,9 @@ OAuth и JWT пропустите во овој елаборат се појав
 
 ## Прилог: лабораториски датотеки
 
-- [`lab/oauth-csrf/`](lab/oauth-csrf/) — OAuth Login CSRF лабораторијата од Дел I.
-- [`lab/jwt/compose.yaml`](lab/jwt/compose.yaml) — Docker конфигурација за JWT лабораторијата.
-- [`lab/jwt/app.js`](lab/jwt/app.js) — намерно ранливи и споредбени проверки.
-- [`lab/jwt/attacks.py`](lab/jwt/attacks.py) — репродукција на трите напади со Python 3.
+Бидејќи лабораториските датотеки не се вградени во самиот HTML документ, тие се достапни за преземање од [GitHub репозиториумот Ethical-Hacking-Project — директориум `lab`](https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab). Репозиториумот ги содржи двете околини наведени подолу.
+
+- [`lab/oauth-csrf/`](https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab/oauth-csrf) — OAuth Login CSRF лабораторијата од Дел I.
+- [`lab/jwt/compose.yaml`](https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/compose.yaml) — Docker конфигурација за JWT лабораторијата.
+- [`lab/jwt/app.js`](https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/app.js) — намерно ранливи и споредбени проверки.
+- [`lab/jwt/attacks.py`](https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/attacks.py) — репродукција на трите напади со Python 3.

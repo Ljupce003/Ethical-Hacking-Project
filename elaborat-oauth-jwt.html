@@ -111,6 +111,7 @@
 <h2 id="section-3">Вовед</h2>
 <p>Најавата преку надворешен провајдер и токените за пристап се вообичаен дел од современите веб-апликации. OAuth 2.0 го уредува делегирањето пристап, OpenID Connect додава стандардизиран идентитетски слој, а JWT е еден од форматите во кои може да се претстават тврдења. Ниту една од овие технологии не ја заменува проверката на контекстот во кој пристигнал одговорот. Погрешно поврзан OAuth callback или погрешно проверен JWT може да создаде валидна на изглед сесија за погрешен корисник.</p>
 <p>Практичниот дел користи две <strong>одвоени</strong>, локални лаборатории. Првата ја демонстрира последицата од callback без параметарот state; втората ги изолира трите JWT грешки. Овие лаборатории не се поврзани во еден продукциски OAuth/OIDC систем. Нивната улога е да овозможат безбедно и повторливо споредување на ранливо и поправено однесување. Сите тестови се насочени кон сервисите приложени со проектот.</p>
+<p>Комплетните лабораториски датотеки за практичниот дел се достапни во јавниот GitHub репозиториум: <a href="https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab">Ethical-Hacking-Project — lab</a>. Пред започнување на вежбите треба да се преземе репозиториумот или директориумот lab, во кој се наоѓаат OAuth и JWT околините.</p>
 <h2 id="section-4">1. Теоретска основа на OAuth 2.0 и OpenID Connect</h2>
 <h3 id="section-5">1.1. Што претставува OAuth 2.0?</h3>
 <p>OAuth 2.0 е рамка за делегирана авторизација. Неговата цел е на една апликација да ѝ овозможи ограничен пристап до ресурси што му припаѓаат на корисникот, без корисникот да ѝ ја открие својата лозинка.</p>
@@ -586,11 +587,12 @@ docker compose ps</code></pre></div><p>При првото стартување 
 <li>OWASP, <a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html">JSON Web Token Cheat Sheet</a>.</li>
 </ol>
 <h2 id="section-43">Прилог: лабораториски датотеки</h2>
+<p>Бидејќи лабораториските датотеки не се вградени во самиот HTML документ, тие се достапни за преземање од <u><a href="https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab">GitHub репозиториумот Ethical-Hacking-Project — директориум <code>lab</code></a></u>. Репозиториумот ги содржи двете околини наведени подолу.</p>
 <ul>
-<li><a href="lab/oauth-csrf/"><code>lab/oauth-csrf/</code></a> — OAuth Login CSRF лабораторијата од Дел I.</li>
-<li><a href="lab/jwt/compose.yaml"><code>lab/jwt/compose.yaml</code></a> — Docker конфигурација за JWT лабораторијата.</li>
-<li><a href="lab/jwt/app.js"><code>lab/jwt/app.js</code></a> — намерно ранливи и споредбени проверки.</li>
-<li><a href="lab/jwt/attacks.py"><code>lab/jwt/attacks.py</code></a> — репродукција на трите напади со Python 3.</li>
+<li><a href="https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab/oauth-csrf"><code>lab/oauth-csrf/</code></a> — OAuth Login CSRF лабораторијата од Дел I.</li>
+<li><a href="https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/compose.yaml"><code>lab/jwt/compose.yaml</code></a> — Docker конфигурација за JWT лабораторијата.</li>
+<li><a href="https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/app.js"><code>lab/jwt/app.js</code></a> — намерно ранливи и споредбени проверки.</li>
+<li><a href="https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/attacks.py"><code>lab/jwt/attacks.py</code></a> — репродукција на трите напади со Python 3.</li>
 </ul>
 </article>
     <p class="footnote">Елаборатот е наменет за локална, изолирана лабораториска употреба. Практичниот код не е продукциска OAuth или JWT имплементација.</p>

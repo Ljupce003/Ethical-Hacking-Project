@@ -159,7 +159,9 @@ OAuth и JWT пропустите во овој елаборат се појав
 
 ## Прилог: лабораториски датотеки
 
-- [`lab/oauth-csrf/`](lab/oauth-csrf/) — OAuth Login CSRF лабораторијата од Дел I.
-- [`lab/jwt/compose.yaml`](lab/jwt/compose.yaml) — Docker конфигурација за JWT лабораторијата.
-- [`lab/jwt/app.js`](lab/jwt/app.js) — намерно ранливи и споредбени проверки.
-- [`lab/jwt/attacks.py`](lab/jwt/attacks.py) — репродукција на трите напади со Python 3.
+Бидејќи лабораториските датотеки не се вградени во самиот HTML документ, тие се достапни за преземање од [GitHub репозиториумот Ethical-Hacking-Project — директориум `lab`](https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab). Репозиториумот ги содржи двете околини наведени подолу.
+
+- [`lab/oauth-csrf/`](https://github.com/Ljupce003/Ethical-Hacking-Project/tree/main/lab/oauth-csrf) — OAuth Login CSRF лабораторијата од Дел I.
+- [`lab/jwt/compose.yaml`](https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/compose.yaml) — Docker конфигурација за JWT лабораторијата.
+- [`lab/jwt/app.js`](https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/app.js) — намерно ранливи и споредбени проверки.
+- [`lab/jwt/attacks.py`](https://github.com/Ljupce003/Ethical-Hacking-Project/blob/main/lab/jwt/attacks.py) — репродукција на трите напади со Python 3.
